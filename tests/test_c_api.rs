@@ -18,30 +18,15 @@ fn test_c_api_lifecycle_and_lookups() {
         let key_absent = b"non_existent_key_99999";
 
         // Membership before insertion
-        assert_eq!(
-            cc_aleph_contains(handle, key1.as_ptr(), key1.len()),
-            0
-        );
+        assert_eq!(cc_aleph_contains(handle, key1.as_ptr(), key1.len()), 0);
 
         // Ingestion
-        assert_eq!(
-            cc_aleph_insert(handle, key1.as_ptr(), key1.len()),
-            0
-        );
-        assert_eq!(
-            cc_aleph_insert(handle, key2.as_ptr(), key2.len()),
-            0
-        );
+        assert_eq!(cc_aleph_insert(handle, key1.as_ptr(), key1.len()), 0);
+        assert_eq!(cc_aleph_insert(handle, key2.as_ptr(), key2.len()), 0);
 
         // Verification
-        assert_eq!(
-            cc_aleph_contains(handle, key1.as_ptr(), key1.len()),
-            1
-        );
-        assert_eq!(
-            cc_aleph_contains(handle, key2.as_ptr(), key2.len()),
-            1
-        );
+        assert_eq!(cc_aleph_contains(handle, key1.as_ptr(), key1.len()), 1);
+        assert_eq!(cc_aleph_contains(handle, key2.as_ptr(), key2.len()), 1);
         assert_eq!(
             cc_aleph_contains(handle, key_absent.as_ptr(), key_absent.len()),
             0

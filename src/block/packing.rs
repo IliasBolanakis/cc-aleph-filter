@@ -129,7 +129,9 @@ pub fn read_bits(buf: &[u8], bit_offset: usize, bit_len: usize) -> Result<u64, P
 
     let start_byte = bit_offset / 8;
     let bit_shift = (bit_offset % 8) as u32;
-    let num_bytes = (bit_shift as usize + bit_len).div_ceil(8).min(buf.len() - start_byte);
+    let num_bytes = (bit_shift as usize + bit_len)
+        .div_ceil(8)
+        .min(buf.len() - start_byte);
 
     let mut accumulator: u128 = 0;
     for i in 0..num_bytes {
