@@ -4,23 +4,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
 
-CC-Aleph is an unbounded, cacheline-aligned Approximate Membership Query (AMQ) filter designed for high-throughput write buffers (MemTables) in Log-Structured Merge (LSM) storage engines[cite: 1, 7]. It addresses the Stop-the-World latency freezes and unaligned memory access patterns inherent in traditional dynamic AMQ filters by combining 64-byte cacheline partitioning, SIMD vectorization, and lock-free extendible directory doubling with Epoch-Based Memory Reclamation (EBMR)[cite: 1, 7].
+CC-Aleph is an unbounded, cacheline-aligned Approximate Membership Query (AMQ) filter designed for high-throughput write buffers (MemTables) in Log-Structured Merge (LSM) storage engines. It addresses the Stop-the-World latency freezes and unaligned memory access patterns inherent in traditional dynamic AMQ filters by combining 64-byte cacheline partitioning, SIMD vectorization, and lock-free extendible directory doubling with Epoch-Based Memory Reclamation (EBMR).
 
 ---
 
 ## 1. Architectural Highlights
 
-* **64-Byte Hardware-Aligned Blocks:** Every primary storage unit aligns to an exact CPU cache line (`align(64)`), guaranteeing single-cycle L1-D loads and eliminating cross-cacheline memory stalls[cite: 1, 7].
-* **Intra-Block SIMD Vectorization:** Parallel evaluations over the 48-byte fingerprint payload execute via AVX2 (`_mm256_cmpeq_epi8`) and SSE registers, achieving a **$4.10\times$ speedup ($943\text{ ps}$)** over scalar bit traversals[cite: 1, 7].
-* **Asynchronous Directory Doubling:** When a block reaches its saturation threshold ($\alpha \ge 0.85$), an asynchronous split is signaled without blocking writer threads, reducing $p99$ tail latency by four orders of magnitude ($1.10\ \mu\text{s}$) compared to Stop-The-World reorganizations[cite: 1, 7].
-* **Wait-Free Optimistic Readers:** Readers traverse blocks using optimistic sequence locks (`SeqLock`), remaining wait-free and contention-free even during background buddy-block splits[cite: 1, 7].
-* **Safe Memory Lifecycle (EBMR):** Swapped directory pointer tables and retired block nodes are tracked and deferred through `crossbeam-epoch` to eliminate use-after-free races[cite: 1, 7].
+* **64-Byte Hardware-Aligned Blocks:** Every primary storage unit aligns to an exact CPU cache line (`align(64)`), guaranteeing single-cycle L1-D loads and eliminating cross-cacheline memory stalls.
+* **Intra-Block SIMD Vectorization:** Parallel evaluations over the 48-byte fingerprint payload execute via AVX2 (`_mm256_cmpeq_epi8`) and SSE registers, achieving a **$4.10\times$ speedup ($943\text{ ps}$)** over scalar bit traversals.
+* **Asynchronous Directory Doubling:** When a block reaches its saturation threshold ($\alpha \ge 0.85$), an asynchronous split is signaled without blocking writer threads, reducing $p99$ tail latency by four orders of magnitude ($1.10\ \mu\text{s}$) compared to Stop-The-World reorganizations.
+* **Wait-Free Optimistic Readers:** Readers traverse blocks using optimistic sequence locks (`SeqLock`), remaining wait-free and contention-free even during background buddy-block splits.
+* **Safe Memory Lifecycle (EBMR):** Swapped directory pointer tables and retired block nodes are tracked and deferred through `crossbeam-epoch` to eliminate use-after-free races.
 
 ---
 
 ## 2. Mathematical Model: Fingerprint Bit-Sacrifice
 
-Traditional dynamic filters like InfiniFilter rely on chained overflow structures, degrading lookups to $O(\log N)$ over time[cite: 1, 7]. CC-Aleph maintains strict $O(1)$ lookup complexity by preserving all records within a single two-level directory table through fingerprint bit-sacrifice[cite: 1, 7].
+Traditional dynamic filters like InfiniFilter rely on chained overflow structures, degrading lookups to $O(\log N)$ over time. CC-Aleph maintains strict $O(1)$ lookup complexity by preserving all records within a single two-level directory table through fingerprint bit-sacrifice.
 
 ```text
                      64-Byte Cacheline Block
