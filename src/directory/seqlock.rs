@@ -52,9 +52,8 @@ impl SeqLock {
     /// Validates whether the data read during the transaction is consistent.
     ///
     /// # Arguments
-    /// * `version` - The sequence version returned by [`read_begin`].
+    /// * `version` - The sequence version returned by [`Self::read_begin`].
     ///
-    /// # Returns
     /// Returns `true` if no writer intervened; `false` if a writer modified the block.
     #[inline]
     #[must_use]
