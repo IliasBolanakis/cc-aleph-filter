@@ -200,12 +200,11 @@ impl Block {
 
         // Update unary bitmask: insert a 1-bit immediately before delimiter `quotient`
         let inv_mask = !self.unary_bitmask;
-        let delim_pos = select64(inv_mask, quotient as u32).ok_or(
-            PackingError::CapacityOverflow {
+        let delim_pos =
+            select64(inv_mask, quotient as u32).ok_or(PackingError::CapacityOverflow {
                 required_bits: 64,
                 max_bits: 64,
-            },
-        )?;
+            })?;
 
         let low_mask = if delim_pos == 0 {
             0
@@ -239,13 +238,8 @@ impl Block {
         }
 
         let start_bit = item_offset * fp_bit_len;
-        let match_idx = find_fingerprint_in_run(
-            &self.payload,
-            start_bit,
-            run_len,
-            fp_bit_len,
-            fingerprint,
-        );
+        let match_idx =
+            find_fingerprint_in_run(&self.payload, start_bit, run_len, fp_bit_len, fingerprint);
 
         let Some(relative_idx) = match_idx else {
             return Ok(false);

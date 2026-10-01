@@ -43,19 +43,29 @@ pub enum PackingError {
 impl fmt::Display for PackingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            Self::CapacityOverflow { required_bits, max_bits } => {
+            Self::CapacityOverflow {
+                required_bits,
+                max_bits,
+            } => {
                 write!(
                     f,
                     "Payload capacity overflow: required {required_bits} bits, maximum capacity is {max_bits} bits"
                 )
             }
-            Self::InvalidBitLength { bit_len, max_allowed } => {
+            Self::InvalidBitLength {
+                bit_len,
+                max_allowed,
+            } => {
                 write!(
                     f,
                     "Invalid bit length {bit_len}: maximum supported scalar length is {max_allowed} bits"
                 )
             }
-            Self::OutOfBounds { bit_offset, bit_len, capacity_bits } => {
+            Self::OutOfBounds {
+                bit_offset,
+                bit_len,
+                capacity_bits,
+            } => {
                 write!(
                     f,
                     "Bit access out of bounds: range [{bit_offset}..{}) exceeds capacity {capacity_bits} bits",
@@ -119,7 +129,7 @@ pub fn read_bits(buf: &[u8], bit_offset: usize, bit_len: usize) -> Result<u64, P
 
     let start_byte = bit_offset / 8;
     let bit_shift = (bit_offset % 8) as u32;
-    let num_bytes = ((bit_shift as usize + bit_len + 7) / 8).min(buf.len() - start_byte);
+    let num_bytes = (bit_shift as usize + bit_len).div_ceil(8).min(buf.len() - start_byte);
 
     let mut accumulator: u128 = 0;
     for i in 0..num_bytes {
@@ -185,7 +195,7 @@ pub fn write_bits(
 
     let start_byte = bit_offset / 8;
     let bit_shift = (bit_offset % 8) as u32;
-    let num_bytes = (bit_shift as usize + bit_len + 7) / 8;
+    let num_bytes = (bit_shift as usize + bit_len).div_ceil(8);
 
     let mut accumulator: u128 = 0;
     for i in 0..num_bytes {
@@ -326,12 +336,12 @@ pub fn pack_fingerprint(
     bit_len: usize,
     fingerprint: u64,
 ) -> Result<(), PackingError> {
-    let required = total_bits_used.checked_add(bit_len).ok_or(
-        PackingError::CapacityOverflow {
+    let required = total_bits_used
+        .checked_add(bit_len)
+        .ok_or(PackingError::CapacityOverflow {
             required_bits: usize::MAX,
             max_bits: PAYLOAD_CAPACITY_BITS,
-        },
-    )?;
+        })?;
 
     if required > PAYLOAD_CAPACITY_BITS {
         return Err(PackingError::CapacityOverflow {
@@ -482,14 +492,7 @@ mod tests {
     #[test]
     fn test_capacity_overflow() {
         let mut payload = [0u8; PAYLOAD_SIZE_BYTES];
-        let err = pack_fingerprint(
-            &mut payload,
-            0,
-            PAYLOAD_CAPACITY_BITS,
-            1,
-            1,
-        )
-            .unwrap_err();
+        let err = pack_fingerprint(&mut payload, 0, PAYLOAD_CAPACITY_BITS, 1, 1).unwrap_err();
 
         assert_eq!(
             err,

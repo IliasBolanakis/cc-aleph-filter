@@ -6,8 +6,7 @@
 #[cfg(target_arch = "x86_64")]
 use core::arch::x86_64::{
     __m128i, __m256i, _mm256_cmpeq_epi8, _mm256_loadu_si256, _mm256_movemask_epi8,
-    _mm256_set1_epi8, _mm_cmpeq_epi8, _mm_loadu_si128, _mm_movemask_epi8, _mm_set1_epi8,
-    _pdep_u64,
+    _mm256_set1_epi8, _mm_cmpeq_epi8, _mm_loadu_si128, _mm_movemask_epi8, _mm_set1_epi8, _pdep_u64,
 };
 
 use crate::block::layout::PAYLOAD_SIZE_BYTES;
@@ -144,7 +143,7 @@ pub fn find_fingerprint_in_run(
     }
 
     // Fast path: byte-aligned 8-bit fingerprints using SIMD comparison
-    if bit_len == 8 && (start_bit_offset % 8 == 0) && target_fp <= 0xFF {
+    if bit_len == 8 && start_bit_offset.is_multiple_of(8) && target_fp <= 0xFF {
         let start_byte = start_bit_offset / 8;
         let end_byte = (start_byte + num_fingerprints).min(PAYLOAD_SIZE_BYTES);
 
@@ -270,9 +269,21 @@ mod tests {
             offset += bit_len;
         }
 
-        assert_eq!(find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b10101), Some(0));
-        assert_eq!(find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b01010), Some(1));
-        assert_eq!(find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b11100), Some(2));
-        assert_eq!(find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b00000), None);
+        assert_eq!(
+            find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b10101),
+            Some(0)
+        );
+        assert_eq!(
+            find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b01010),
+            Some(1)
+        );
+        assert_eq!(
+            find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b11100),
+            Some(2)
+        );
+        assert_eq!(
+            find_fingerprint_in_run(&payload, 13, 3, bit_len, 0b00000),
+            None
+        );
     }
 }

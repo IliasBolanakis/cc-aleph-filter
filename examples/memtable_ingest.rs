@@ -131,17 +131,27 @@ fn main() {
 
     let elapsed = start.elapsed();
     let total_records = num_writer_threads * items_per_writer;
-    let total_throughput =
-        ((total_records + (num_reader_threads * 10_000)) as f64 / elapsed.as_secs_f64()) / 1_000_000.0;
+    let total_throughput = ((total_records + (num_reader_threads * 10_000)) as f64
+        / elapsed.as_secs_f64())
+        / 1_000_000.0;
 
     println!("-------------------------------------------------------------------------------");
     println!(" Simulation Execution Summary:");
     println!("  Total Records Ingested:    {}", total_records);
     println!("  Execution Elapsed Time:    {:.2?}", elapsed);
-    println!("  Blended System Throughput: {:.2} Mops/sec", total_throughput);
+    println!(
+        "  Blended System Throughput: {:.2} Mops/sec",
+        total_throughput
+    );
     println!("  Negative Lookups Bypassed: {}", memtable.bypassed_count());
     println!("  Positive Lookups Serviced: {}", memtable.hit_count());
-    println!("  Filter Active Blocks:      {}", memtable.filter.num_blocks());
-    println!("  Filter Global Depth:       {}", memtable.filter.global_depth());
+    println!(
+        "  Filter Active Blocks:      {}",
+        memtable.filter.num_blocks()
+    );
+    println!(
+        "  Filter Global Depth:       {}",
+        memtable.filter.global_depth()
+    );
     println!("===============================================================================");
 }

@@ -240,8 +240,11 @@ impl DirectoryInner {
 
             // Re-validate against the latest active directory table after acquiring write lock
             let cur_table_shared = self.table.load(Ordering::Acquire, guard);
-            let cur_table =
-                unsafe { cur_table_shared.as_ref().expect("Table pointer must be valid") };
+            let cur_table = unsafe {
+                cur_table_shared
+                    .as_ref()
+                    .expect("Table pointer must be valid")
+            };
             let cur_global_d = cur_table.global_depth;
             let cur_dir_idx = if cur_global_d == 0 {
                 0
@@ -263,9 +266,7 @@ impl DirectoryInner {
             let count = block.count();
 
             // 1. Asynchronous Expansion Trigger: Signal background worker when crossing threshold
-            if count >= self.split_threshold
-                && !node.is_splitting.swap(true, Ordering::AcqRel)
-            {
+            if count >= self.split_threshold && !node.is_splitting.swap(true, Ordering::AcqRel) {
                 let _ = self
                     .job_sender
                     .try_send(ExpansionJob::Split(node_ptr as usize));
@@ -273,11 +274,7 @@ impl DirectoryInner {
 
             // 2. Zero-Stall Fast Path: Insert directly if block has headroom
             if count < HARD_BLOCK_CAPACITY_LIMIT {
-                match block.insert(
-                    decomp.intra_quotient,
-                    decomp.fingerprint,
-                    decomp.fp_bit_len,
-                ) {
+                match block.insert(decomp.intra_quotient, decomp.fingerprint, decomp.fp_bit_len) {
                     Ok(()) => {
                         self.total_items.fetch_add(1, Ordering::Relaxed);
                         drop(write_guard);
@@ -340,8 +337,7 @@ impl DirectoryInner {
         }
 
         let original_block = unsafe { &*node.block.get() };
-        let (daughter_0, daughter_1) =
-            split_block(original_block, local_depth, self.base_fp_bits)?;
+        let (daughter_0, daughter_1) = split_block(original_block, local_depth, self.base_fp_bits)?;
 
         unsafe {
             *node.block.get() = daughter_0;
@@ -367,12 +363,9 @@ impl DirectoryInner {
             }
 
             let buddy_bit = 1usize << local_depth;
-            for idx in 0..new_size {
-                if new_slots[idx].load(Ordering::Relaxed)
-                    == (node as *const BlockNode as *mut BlockNode)
-                    && (idx & buddy_bit) != 0
-                {
-                    new_slots[idx].store(daughter_1_node, Ordering::Relaxed);
+            for (idx, slot) in new_slots.iter().enumerate() {
+                if std::ptr::eq(slot.load(Ordering::Relaxed), node) && (idx & buddy_bit) != 0 {
+                    slot.store(daughter_1_node, Ordering::Relaxed);
                 }
             }
 
@@ -390,9 +383,7 @@ impl DirectoryInner {
         } else {
             let buddy_bit = 1usize << local_depth;
             for (idx, slot) in table.slots.iter().enumerate() {
-                if slot.load(Ordering::Relaxed) == (node as *const BlockNode as *mut BlockNode)
-                    && (idx & buddy_bit) != 0
-                {
+                if std::ptr::eq(slot.load(Ordering::Relaxed), node) && (idx & buddy_bit) != 0 {
                     slot.store(daughter_1_node, Ordering::Release);
                 }
             }

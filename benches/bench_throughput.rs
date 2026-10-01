@@ -1,7 +1,7 @@
 //! Multithreaded scaling benchmarks measuring operations per second.
 
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::thread;
 
@@ -27,7 +27,7 @@ fn bench_concurrent_reads(c: &mut Criterion) {
 
                     for t in 0..threads {
                         let f = Arc::clone(&filter);
-                        let s = Arc::clone(&stop);
+                        let _ = Arc::clone(&stop);
                         let handle = thread::spawn(move || {
                             let mut ops = 0usize;
                             for i in 0..1_000 {

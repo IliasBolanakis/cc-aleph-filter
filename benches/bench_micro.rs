@@ -37,7 +37,8 @@ fn bench_block_insert_query(c: &mut Criterion) {
         b.iter_batched(
             Block::new,
             |mut block| {
-                black_box(block.insert(black_box(7), black_box(0xAB), black_box(8)).unwrap());
+                let res = block.insert(black_box(7), black_box(0xAB), black_box(8));
+                black_box(res).unwrap();
             },
             criterion::BatchSize::SmallInput,
         );

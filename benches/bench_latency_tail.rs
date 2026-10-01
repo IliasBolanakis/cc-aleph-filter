@@ -1,7 +1,7 @@
 //! Ingestion tail latency benchmark measuring p50, p99, and p99.9 spikes across doubling events.
 
-use std::time::Instant;
 use cc_aleph::CcAlephFilter;
+use std::time::Instant;
 
 fn main() {
     println!("===============================================================================");
@@ -45,10 +45,25 @@ fn main() {
     println!("  Overall Throughput:    {throughput_mops:.2} Mops/sec");
     println!("-------------------------------------------------------------------------------");
     println!(" Ingestion Latency Distribution (nanoseconds):");
-    println!("  p50 (Median):          {p50} ns ({:.2} µs)", p50 as f64 / 1_000.0);
-    println!("  p90:                   {p90} ns ({:.2} µs)", p90 as f64 / 1_000.0);
-    println!("  p99:                   {p99} ns ({:.2} µs)", p99 as f64 / 1_000.0);
-    println!("  p99.9:                 {p99_9} ns ({:.2} µs)", p99_9 as f64 / 1_000.0);
-    println!("  Max:                   {max} ns ({:.2} µs)", max as f64 / 1_000.0);
+    println!(
+        "  p50 (Median):          {p50} ns ({:.2} µs)",
+        p50 as f64 / 1_000.0
+    );
+    println!(
+        "  p90:                   {p90} ns ({:.2} µs)",
+        p90 as f64 / 1_000.0
+    );
+    println!(
+        "  p99:                   {p99} ns ({:.2} µs)",
+        p99 as f64 / 1_000.0
+    );
+    println!(
+        "  p99.9:                 {p99_9} ns ({:.2} µs)",
+        p99_9 as f64 / 1_000.0
+    );
+    println!(
+        "  Max:                   {max} ns ({:.2} µs)",
+        max as f64 / 1_000.0
+    );
     println!("===============================================================================");
 }
