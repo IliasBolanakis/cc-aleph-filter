@@ -1,6 +1,7 @@
 //! Microbenchmarks measuring intra-block SIMD efficiency and point lookups.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
+use std::hint::black_box;
 
 use cc_aleph::block::layout::Block;
 use cc_aleph::block::simd::{scan_payload_bytes, scan_payload_scalar};

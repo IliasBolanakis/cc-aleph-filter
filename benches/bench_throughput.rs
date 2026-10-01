@@ -1,6 +1,7 @@
 //! Multithreaded scaling benchmarks measuring operations per second.
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use std::thread;
