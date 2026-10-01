@@ -18,6 +18,12 @@
 //! * **Safe Epoch Reclamation:** Deallocated directory pointers and retired blocks are
 //!   reclaimed via Epoch-Based Memory Reclamation (`crossbeam-epoch`).
 //!
+//! ## Optional Feature Flags
+//!
+//! * `logging`: Enables cold-path diagnostic logging via the `tracing` crate
+//!   (tracks directory doubling events, worker thread lifecycle, and background splits).
+//!   Zero runtime or dependency overhead when disabled.
+//!
 //! ## Example Usage
 //!
 //! ```rust

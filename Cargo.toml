@@ -18,6 +18,13 @@ xxhash-rust = { version = "0.8", features = ["xxh3"] }
 crossbeam-epoch = "0.9"
 parking_lot = "0.12"
 
+# Optional zero-cost structured logging (cold path only)
+tracing = { version = "0.1", optional = true, default-features = false }
+
+[features]
+default = []
+logging = ["dep:tracing"]
+
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
 

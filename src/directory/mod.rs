@@ -303,18 +303,24 @@ impl DirectoryInner {
         if node_ptr.is_null() {
             return;
         }
-
         let node = unsafe { &*node_ptr };
         let write_guard = node.seqlock.write_lock();
-
         let block = unsafe { &*node.block.get() };
         if block.count() < self.split_threshold {
             node.is_splitting.store(false, Ordering::Release);
             drop(write_guard);
             return;
         }
-
         let local_depth = node.local_depth.load(Ordering::Acquire);
+
+        #[cfg(feature = "logging")]
+        tracing::debug!(
+            target_node = ?node_ptr,
+            local_depth = local_depth,
+            item_count = block.count(),
+            "Starting asynchronous buddy-block split"
+        );
+
         let _exp_guard = self.expansion_lock.lock();
         let _ = self.split_and_expand_node(node, local_depth, guard);
         node.is_splitting.store(false, Ordering::Release);
@@ -373,6 +379,14 @@ impl DirectoryInner {
                 global_depth: table.global_depth + 1,
                 slots: new_slots,
             };
+
+            #[cfg(feature = "logging")]
+            tracing::info!(
+                old_depth = table.global_depth,
+                new_depth = table.global_depth + 1,
+                new_slot_count = new_size,
+                "Global directory doubled"
+            );
 
             let old = self
                 .table
@@ -462,13 +476,20 @@ impl Directory {
 
         let worker_inner = Arc::clone(&inner);
         let worker_handle = spawn(move || {
+            #[cfg(feature = "logging")]
+            tracing::info!("CC-Aleph expansion worker thread spawned");
+
             while let Ok(job) = rx.recv() {
                 match job {
                     ExpansionJob::Split(node_ptr_val) => {
                         let guard = &pin();
                         worker_inner.handle_background_split(node_ptr_val as *mut BlockNode, guard);
                     }
-                    ExpansionJob::Terminate => break,
+                    ExpansionJob::Terminate => {
+                        #[cfg(feature = "logging")]
+                        tracing::info!("CC-Aleph expansion worker received termination signal");
+                        break;
+                    }
                 }
             }
         });
