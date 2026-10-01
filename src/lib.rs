@@ -48,5 +48,6 @@ pub mod directory;
 pub mod epoch;
 pub mod filter;
 pub mod hash;
+pub mod c_api;
 
 pub use filter::CcAlephFilter;
