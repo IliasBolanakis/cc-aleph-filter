@@ -3,6 +3,7 @@
 [![Rust](https://img.shields.io/badge/rust-nightly%20%7C%20stable-orange.svg)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/tests-passing-brightgreen.svg)]()
+[![CC-Aleph CI](https://github.com/IliasBolanakis/cc-aleph-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/IliasBolanakis/cc-aleph-filter/actions)
 
 CC-Aleph is an unbounded, cacheline-aligned Approximate Membership Query (AMQ) filter designed for high-throughput write buffers (MemTables) in Log-Structured Merge (LSM) storage engines. It addresses the Stop-the-World latency freezes and unaligned memory access patterns inherent in traditional dynamic AMQ filters by combining 64-byte cacheline partitioning, SIMD vectorization, and lock-free extendible directory doubling with Epoch-Based Memory Reclamation (EBMR).
 
