@@ -1,0 +1,45 @@
+[package]
+name = "cc-aleph"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <you@example.com>"]
+description = "Cache-Partitioned Concurrent Aleph Filter for Zero-Stall Ingestion in LSM Engines"
+readme = "README.md"
+
+[dependencies]
+# 128-bit hashing with low collision rates and fast bulk throughput
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+
+# Concurrency primitives and Epoch-Based Memory Reclamation (EBMR)
+crossbeam-epoch = "0.9"
+crossbeam-utils = "0.8"
+parking_lot = "0.12"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+rand = "0.8"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = true
+
+[profile.bench]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = true
+
+[[bench]]
+name = "bench_micro"
+harness = false
+
+[[bench]]
+name = "bench_throughput"
+harness = false
+
+[[bench]]
+name = "bench_latency_tail"
+harness = false

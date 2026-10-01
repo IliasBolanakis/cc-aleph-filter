@@ -1,0 +1,5 @@
+[build]
+# Direct compiler to emit native CPU vector instructions (AVX2, BMI1, BMI2)
+rustflags = [
+    "-C", "target-cpu=native",
+]
